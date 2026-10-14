@@ -92,8 +92,8 @@ NOPs.  Zero gate cost on implementations without caches.
   invalidate).  Required for correct data visibility between the CPU
   and non-coherent agents such as DMA controllers and peripheral
   engines.  The instructions must be supported on all memory regions
-  with main-memory PMAs, and must not raise an exception on such
-  regions.
+  with cacheable and coherent PMAs, and must not raise an exception on
+  such regions.
 
 NOTE: This profile does not require an implementation to have caches.
 The requirement is expressed against memory attributes rather than
