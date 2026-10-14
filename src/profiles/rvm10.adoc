@@ -91,18 +91,27 @@ NOPs.  Zero gate cost on implementations without caches.
 - extlink:zicbom[] Cache-block management operations (clean, flush,
   invalidate).  Required for correct data visibility between the CPU
   and non-coherent agents such as DMA controllers and peripheral
-  engines.
+  engines.  The instructions must be supported on all memory regions
+  with cacheable and coherent PMAs, and must not raise an exception on
+  such regions.
 
-NOTE: On cacheless implementations, ext:zicbom[] instructions behave
-as NOPs.  Making CMO mandatory ensures portable software can assume
-cache management is available without conditional compilation.
+NOTE: This profile does not require an implementation to have caches.
+The requirement is expressed against memory attributes rather than
+against the presence of a cache, so an implementation without caches
+satisfies it: with no cached copies to write back or invalidate, the
+architectural effect of a clean, flush or invalidate operation is
+already achieved.  Software can therefore issue cache management
+operations unconditionally on any compliant implementation.
 
 - extlink:zicboz[] Cache-block zero operations.  Provides fast zeroing
   of memory regions, avoiding the read-for-ownership overhead of store
   loops.
 
-NOTE: On cacheless implementations, ext:zicboz[] instructions behave
-as NOPs.
+NOTE: Unlike the other cache-block operations, ext:zicboz[] has an
+architectural effect on memory: `cbo.zero` stores zeroes to the
+addressed block.  It is not a hint and cannot be implemented as a NOP,
+including on implementations without caches, where it is realised as a
+store of zeroes to the block.
 
 - extlink:zicntr[] Base counters and timers (`cycle`, `time`,
   `instret`).
@@ -126,7 +135,18 @@ There are no development options in RVM10U32 yet.
 
 ===== Expansion Options
 
-There are no expansion options in RVM10U32 yet.
+- extlink:f[] Single-precision floating-point.
+
+- extlink:d[] Double-precision floating-point, which requires
+  extlink:f[].
+
+NOTE: Hardware floating point is deliberately not in the mandatory
+set.  Many microcontrollers in the target range implement floating
+point in software, and mandating it would exclude them.  Naming
+ext:f[] and ext:d[] as options means implementations with and without
+hardware floating point are both conformant, and toolchains know
+precisely which variant they target.  Where ext:f[] is present,
+ext:zce[] includes ext:zcf[] as stated above.
 
 ===== Transitory Options
 
