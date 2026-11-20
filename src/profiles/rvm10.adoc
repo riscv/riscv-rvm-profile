@@ -73,7 +73,7 @@ NOTE: ext:zce[] includes ext:zicsr[].
 - extlink:zifencei[] Instruction-fetch fence.
 
 - extlink:zicond[] Integer conditional operations (`czero.eqz`,
-  `czero.nez`).  
+  `czero.nez`).
 
 NOTE: ext:zicond[] is also mandatory in RVA23.
 
