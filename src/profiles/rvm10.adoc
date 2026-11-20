@@ -1,7 +1,7 @@
 == RVM10 Profiles
 
-NOTE: This is a *proposed* profile in early development.  The contents
-of this chapter are a draft and subject to change.  Not for
+NOTE: This profile is under development and is not ratified.  The
+contents of this chapter are a draft and subject to change.  Not for
 implementation.
 
 The RVM10 profile family targets microcontroller-class processors,
@@ -14,15 +14,16 @@ achieved using individual RISC-V extensions.  The goal of RVM10 is to
 mandate a common set of standard extensions to simplify software
 support and reduce fragmentation across MCU vendors.
 
-RVM10 reflect the current state of the RISC-V ISA and the needs of 
+RVM10 reflects the current state of the RISC-V ISA and the needs of 
 mid-range and high-end embedded applications in industrial control, motor
 drives, automotive ECUs, IoT gateways, and similar workloads.
 
 This initial version of the RVM10 family specifies only unprivileged
-ISA features (RVM10U32).  ISA features related to interrupt and
-exception handling or privileged execution are often highly
-platform-specific in the microcontroller domain and are planned for a
-subsequent phase that will define RVM10S32 and RVM10M32.
+ISA features (RVM10U32).  ISA features for supervisor-mode execution
+are planned for a subsequent phase that will define RVM10S32.
+Machine-mode behavior, interrupt handling and other platform-specific
+requirements are defined in the companion microcontroller subsystem
+specification, not in this profile.
 
 === RVM10U32 Profile
 
@@ -72,8 +73,7 @@ NOTE: ext:zce[] includes ext:zicsr[].
 - extlink:zifencei[] Instruction-fetch fence.
 
 - extlink:zicond[] Integer conditional operations (`czero.eqz`,
-  `czero.nez`).  Eliminates branches for simple conditional
-  assignments, reducing branch-misprediction penalties and code size.
+  `czero.nez`).  
 
 NOTE: ext:zicond[] is also mandatory in RVA23.
 
@@ -116,8 +116,8 @@ store of zeroes to the block.
 - extlink:zicntr[] Base counters and timers (`cycle`, `time`,
   `instret`).
 
-NOTE: Cycle-accurate timing is essential for WCET analysis and
-deadline guarantees in real-time MCU workloads.
+NOTE: Real-time software uses these counters to measure execution
+time, for example the length of critical sections and task switches.
 
 ==== RVM10U32 Optional Extensions
 
@@ -131,9 +131,31 @@ There are no localized options in RVM10U32 yet.
 
 ===== Development Options
 
-There are no development options in RVM10U32 yet.
+- extlink:zilsd[] Load/store pair instructions for RV32.
+
+- extlink:zclsd[] Compressed load/store pair instructions for RV32.
+  ext:zclsd[] requires ext:zilsd[].  It has overlapping encodings
+  with ext:zcf[] and cannot be implemented together with ext:f[],
+  because ext:zce[] includes ext:zcf[] when ext:f[] is present.
+
+NOTE: Load/store pair instructions move 64-bit values with a single
+instruction on RV32, which helps code that works with 64-bit integers
+or with double-precision values held in integer registers.  They are
+listed as development options because they are expected to become
+mandatory in a later RVM profile.
 
 ===== Expansion Options
+
+- extlink:zalrsc[] Load-reserved and store-conditional instructions.
+
+- extlink:zaamo[] Atomic memory operations.
+
+NOTE: Atomic instructions are not in the mandatory set.  Software on
+single-hart microcontrollers commonly protects critical sections by
+masking interrupts and has no need for them.  They become necessary
+on multi-hart implementations, where they are used for locks and for
+communication between harts.  An implementation that provides both
+ext:zalrsc[] and ext:zaamo[] provides the A extension.
 
 - extlink:f[] Single-precision floating-point.
 
@@ -159,19 +181,8 @@ exceptions on attempts to execute unimplemented opcodes.
 
 === RVM10S32 Profile
 
-NOTE: RVM10S32 is a placeholder for the privileged-architecture phase
-of RVM10 and is not specified in this draft.  The privileged phase is
-planned for a subsequent revision and the mandatory and optional
-extensions are subject to TG discussion.  Topics under discussion
-include the supervisor-mode baseline, the interrupt-controller model
-(CLIC, AIA, or legacy CLINT), and the scope of PMP requirements.
-
-=== RVM10M32 Profile
-
-NOTE: RVM10M32 is a placeholder for the machine-mode profile of the
-privileged-architecture phase and is not specified in this draft.
-RVM10M32 is expected to include the mandatory and optional extensions
-of RVM10S32, plus machine-mode-only requirements such as PMP and
-its enhancements.
+NOTE: RVM10S32 is a placeholder for the supervisor-mode profile and is
+not specified in this draft.  Its mandatory and optional extensions
+are subject to TG discussion.
 
 //
